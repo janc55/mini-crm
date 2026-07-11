@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Nuevo' if is_new else 'Editar' }} Usuario - Mini CRM{% endblock %}
+
+{% block header_actions %}
+{{ super() }}
+<a href="{{ url_for('users.list_users') }}" class="btn btn-secondary">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+    Volver
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2 style="margin-bottom: 0.25rem; font-size: 1.5rem;">{{ 'Nuevo Usuario' if is_new else 'Editar Usuario' }}</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+        {% if is_new %}
+        Completa los datos del nuevo miembro del equipo.
+        {% else %}
+        Modifica los datos de <strong>{{ user.username }}</strong>.
+        {% endif %}
+    </p>
+
+    <form method="POST">
+        {% if is_new %}
+        <div class="form-group">
+            <label for="username">Usuario (para login) *</label>
+            <input type="text" name="username" id="username" class="form-control" required autofocus
+                   placeholder="ej. maria.lopez"
+                   pattern="[a-zA-Z0-9._-]+"
+                   value="{{ user.username or '' }}">
+            <small style="color: var(--text-secondary); font-size: 0.8rem;">Solo letras, numeros, guion y punto. Sin espacios.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Contrasena *</label>
+            <input type="password" name="password" id="password" class="form-control" required
+                   placeholder="Minimo 6 caracteres">
+        </div>
+        {% else %}
+        <div class="form-group">
+            <label>Usuario</label>
+            <input type="text" class="form-control" value="{{ user.username }}" disabled
+                   style="background: rgba(255,255,255,0.03); cursor: not-allowed; opacity: 0.7;">
+        </div>
+
+        <div class="form-group">
+            <label for="password">Nueva contrasena (opcional)</label>
+            <input type="password" name="password" id="password" class="form-control"
+                   placeholder="Dejar vacio para no cambiar">
+            <small style="color: var(--text-secondary); font-size: 0.8rem;">Solo llena esto si quieres resetear la contrasena. Minimo 6 caracteres.</small>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="nombre">Nombre completo *</label>
+            <input type="text" name="nombre" id="nombre" class="form-control" required
+                   placeholder="ej. Maria Lopez"
+                   value="{{ user.nombre or '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email *</label>
+            <input type="email" name="email" id="email" class="form-control" required
+                   placeholder="ej. maria.lopez@gmail.com"
+                   value="{{ user.email or '' }}">
+            <small style="color: var(--text-secondary); font-size: 0.8rem;">Este email se usa para asignar leads. Debe coincidir con el que el agente escribe en el sheet.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="rol">Rol *</label>
+            <select name="rol" id="rol" class="form-control" required
+                    {% if not is_new and user.id == current_user.id %}disabled{% endif %}>
+                <option value="agente" {% if user.rol == 'agente' %}selected{% endif %}>Agente</option>
+                <option value="marketing" {% if user.rol == 'marketing' %}selected{% endif %}>Marketing (responsable)</option>
+                <option value="admin" {% if user.rol == 'admin' %}selected{% endif %}>Admin</option>
+            </select>
+            {% if not is_new and user.id == current_user.id %}
+            <input type="hidden" name="rol" value="{{ user.rol }}">
+            <small style="color: var(--text-secondary); font-size: 0.8rem;">No puedes cambiar tu propio rol.</small>
+            {% endif %}
+        </div>
+
+        {% if not is_new %}
+        <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox" name="activo" {% if user.activo %}checked{% endif %}
+                       {% if user.id == current_user.id %}disabled{% endif %}
+                       style="width: 18px; height: 18px;">
+                <span>Usuario activo</span>
+            </label>
+            {% if user.id == current_user.id %}
+            <small style="color: var(--text-secondary); font-size: 0.8rem;">No puedes desactivarte a ti mismo.</small>
+            {% else %}
+            <small style="color: var(--text-secondary); font-size: 0.8rem;">Los usuarios inactivos no pueden iniciar sesion y quedan fuera del Round Robin.</small>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="form-actions">
+            <a href="{{ url_for('users.list_users') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">{{ 'Crear Usuario' if is_new else 'Guardar Cambios' }}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

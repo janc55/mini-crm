@@ -1,0 +1,28 @@
+# Archivos que NO van a la imagen Docker
+# (tests, DBs locales, caches, etc.)
+
+# Tests
+tests/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Bases de datos locales
+crm.db
+*.db
+
+# Credenciales (se montan como volumen/secret en Dokploy)
+credentials.json
+.env
+
+# Git
+.git/
+.gitignore
+README.md
+
+# Archivos del editor
+.vscode/
+.idea/
+*.swp
+.DS_Store

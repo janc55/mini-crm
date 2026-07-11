@@ -1,0 +1,8 @@
+flask
+gspread
+oauth2client
+python-dotenv
+flask-login
+apscheduler
+gunicorn
+

@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Lead - Mini CRM{% endblock %}
+
+{% block header_actions %}
+{{ super() }}
+<a href="{{ url_for('index') }}" class="btn btn-secondary">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+    Volver
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 650px; margin: 0 auto;">
+    <h2 style="margin-bottom: 0.25rem; font-size: 1.5rem;">Registrar Lead</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Completa los datos del interesado</p>
+
+    {% if duplicate_celular %}
+        <div class="alert alert-warning" style="margin-bottom: 1rem;">
+            <span>
+                El celular ya existe. Puedes editarlo haciendo clic aquí.
+                <a href="{{ url_for('edit_lead', celular=duplicate_celular) }}" class="btn btn-accent btn-sm" style="display: inline-flex; margin-top: 0.5rem;">
+                    Editar Lead Existente
+                </a>
+            </span>
+        </div>
+    {% endif %}
+
+    <form action="{{ url_for('add_lead') }}" method="POST" id="lead-form" onsubmit="return validateForm()">
+
+        <div class="form-group">
+            <label for="celular">Celular *</label>
+            <input type="text" name="celular" id="celular" class="form-control"
+                   placeholder="Ej. +56 9 1234 5678" required autofocus
+                   value="{{ form.celular if form.celular else '' }}">
+            <span id="celular-error" style="color: var(--danger); font-size: 0.85rem; display: none; margin-top: 0.25rem;">El número de celular es obligatorio.</span>
+        </div>
+
+        <div class="form-group">
+            <label for="nombre">Nombre Completo</label>
+            <input type="text" name="nombre" id="nombre" class="form-control"
+                   placeholder="Ej. Juan Pérez"
+                   value="{{ form.nombre if form.nombre else '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="interes">Interés *</label>
+            <select name="interes" id="interes" class="form-control" required onchange="toggleOtroInteres()">
+                {% for val, label in intereses %}
+                    <option value="{{ val }}" {% if form.interes == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group" id="grupo-interes-otro" style="display: none;">
+            <label for="interes_otro">Escribe el interés personalizado *</label>
+            <input type="text" name="interes_otro" id="interes_otro" class="form-control"
+                   placeholder="Ej. Curso de Oratoria"
+                   value="{{ form.interes_otro if form.interes_otro else '' }}">
+            <span id="interes-otro-error" style="color: var(--danger); font-size: 0.85rem; display: none; margin-top: 0.25rem;">Debes escribir el interés personalizado (mínimo 2 caracteres).</span>
+        </div>
+
+        <div class="form-group">
+            <label for="estado">Estado *</label>
+            <select name="estado" id="estado" class="form-control" required>
+                {% for estado in estados %}
+                    <option value="{{ estado }}" {% if form.estado == estado %}selected{% endif %}>{{ estado }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="fecha_registro">Fecha de Registro *</label>
+            <input type="text" name="fecha_registro" id="fecha_registro" class="form-control" required
+                   placeholder="DD/MM/YYYY"
+                   value="{{ form.fecha_registro }}">
+        </div>
+
+        <div class="form-group">
+            <label for="observaciones">Observaciones / Notas adicionales</label>
+            <textarea name="observaciones" id="observaciones" class="form-control"
+                      placeholder="Escribe comentarios, acuerdos, o detalles importantes del lead...">{{ form.observaciones if form.observaciones else '' }}</textarea>
+        </div>
+
+        <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--panel-border);">
+            <h3 style="font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem; font-weight: 600;">Control interno</h3>
+
+            <div class="form-group">
+                <label for="agente">Agente asignado</label>
+                {% if current_user.has_role('agente') %}
+                    <input type="hidden" name="agente" value="">
+                    <div class="form-control" style="background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.3); display: flex; align-items: center; gap: 0.5rem; color: #818cf8; font-weight: 500;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                        Asignacion automatica (Round Robin)
+                    </div>
+                    <small style="color: var(--text-secondary); font-size: 0.8rem;">El lead se asignara al siguiente agente disponible en el ciclo de Round Robin. Tu email: <strong>{{ current_user.email }}</strong></small>
+                {% else %}
+                    <select name="agente" id="agente" class="form-control">
+                        <option value="" {% if form.agente == '' or form.agente is none %}selected{% endif %}>
+                            &#x1F504; Asignacion automatica (Round Robin)
+                        </option>
+                        <option value="__none__" {% if form.agente == '__none__' %}selected{% endif %}>
+                            -- Sin asignar --
+                        </option>
+                        {% for agent in agents %}
+                            <option value="{{ agent.email }}"
+                                    {% if form.agente == agent.email %}selected{% endif %}>
+                                {{ agent.nombre }} ({{ agent.email }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small style="color: var(--text-secondary); font-size: 0.8rem;">Por defecto se usa Round Robin para distribuir equitativamente. Puedes elegir un agente especifico o dejarlo sin asignar.</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="ultimo_contacto">Último contacto</label>
+                <input type="date" name="ultimo_contacto" id="ultimo_contacto" class="form-control"
+                       value="{{ form.ultimo_contacto if form.ultimo_contacto else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="nota_interna">Nota interna</label>
+                <textarea name="nota_interna" id="nota_interna" class="form-control"
+                          placeholder="Comentarios privados del equipo (no se muestran al lead)...">{{ form.nota_interna if form.nota_interna else '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Registrar Lead</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleOtroInteres() {
+        const interesSelect = document.getElementById('interes');
+        const grupoOtro = document.getElementById('grupo-interes-otro');
+        const interesOtroInput = document.getElementById('interes_otro');
+
+        if (interesSelect.value === 'Otro') {
+            grupoOtro.style.display = 'block';
+            interesOtroInput.required = true;
+        } else {
+            grupoOtro.style.display = 'none';
+            interesOtroInput.required = false;
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', toggleOtroInteres);
+
+    function validateForm() {
+        let isValid = true;
+
+        const celularInput = document.getElementById('celular');
+        const celularError = document.getElementById('celular-error');
+        const interesSelect = document.getElementById('interes');
+        const interesOtroInput = document.getElementById('interes_otro');
+        const interesOtroError = document.getElementById('interes-otro-error');
+
+        if (!celularInput.value.trim()) {
+            celularError.style.display = 'block';
+            isValid = false;
+        } else {
+            celularError.style.display = 'none';
+        }
+
+        if (interesSelect.value === 'Otro') {
+            if (!interesOtroInput.value.trim() || interesOtroInput.value.trim().length < 2) {
+                interesOtroError.style.display = 'block';
+                isValid = false;
+            } else {
+                interesOtroError.style.display = 'none';
+            }
+        }
+
+        return isValid;
+    }
+</script>
+{% endblock %}

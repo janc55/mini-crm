@@ -1,162 +1,269 @@
 {% extends "base.html" %}
 
+{% block title %}Leads - Mini CRM{% endblock %}
+
 {% block header_badge %}
-<span style="background: var(--primary); color: white; padding: 0.2rem 0.65rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 700; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 10px rgba(99, 102, 241, 0.35); transform: translateY(-1px);" title="Total de Leads Registrados">
+<span class="badge estado-nuevo" style="font-size: 0.85rem; padding: 0.3rem 0.75rem;">
+    {{ total_leads }} leads
+</span>
+{% endblock %}
+
+{% block mobile_header_badge %}
+<span class="badge estado-nuevo" style="font-size: 0.75rem;">
     {{ total_leads }}
 </span>
 {% endblock %}
 
 {% block header_actions %}
-{{ super() }}
-<a href="{{ url_for('add_lead') }}" class="btn btn-accent">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<a href="{{ url_for('add_lead') }}" class="btn btn-success">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
-    Agregar Nuevo Lead
+    Nuevo Lead
 </a>
 {% endblock %}
 
 {% block content %}
-<!-- Barra de búsqueda -->
-<div class="card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
-    <form action="{{ url_for('index') }}" method="GET" class="controls-row">
-        <div class="search-box">
-            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" name="q" value="{{ query }}" placeholder="Buscar por celular, nombre, interés o agente..." class="search-input" autofocus id="search-input">
-        </div>
-        <div style="display: flex; gap: 0.5rem;">
-            <button type="submit" class="btn btn-primary">Buscar</button>
-            {% if query %}
-                <a href="{{ url_for('index') }}" class="btn btn-secondary">Limpiar</a>
-            {% endif %}
-        </div>
-    </form>
-</div>
+<div style="padding: 0 1rem;">
 
-<!-- Listado de Leads -->
-<div class="card" style="padding: 0;">
-    <div class="table-responsive">
-        {% if leads %}
+    {# ===== SEARCH BAR ===== #}
+    <div class="search-wrapper">
+        <form action="{{ url_for('index') }}" method="GET">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" name="q" value="{{ query }}" placeholder="Buscar por celular, nombre, interes..." class="search-input" autofocus id="search-input">
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    Buscar
+                </button>
+                {% if query %}
+                <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm">Limpiar</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {# ===== LEADS CONTENT ===== #}
+    {% if leads %}
+
+        {# ===== MOBILE: CARDS VIEW ===== #}
+        <div class="leads-list">
+            {% for lead in leads %}
+            <div class="lead-card">
+                <div class="lead-card-header">
+                    <div class="lead-card-info">
+                        <div class="lead-card-name">{{ lead.nombre if lead.nombre else 'Sin nombre' }}</div>
+                        <div class="lead-card-phone">{{ lead.celular }}</div>
+                    </div>
+                    <div class="lead-card-menu">
+                        <button class="lead-card-menu-btn" onclick="toggleContextMenu(this)" aria-label="Acciones">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="5" r="1"></circle>
+                                <circle cx="12" cy="12" r="1"></circle>
+                                <circle cx="12" cy="19" r="1"></circle>
+                            </svg>
+                        </button>
+                        <div class="context-menu">
+                            {% if can_edit_lead(lead) %}
+                            <a href="{{ url_for('edit_lead', celular=lead.celular) }}" class="context-menu-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Editar
+                            </a>
+                            {% endif %}
+                            {% if current_user.is_supervisor %}
+                            <div class="context-menu-divider"></div>
+                            <button type="button" class="context-menu-item danger" onclick="confirmDelete('{{ lead.celular }}', '{{ lead.nombre }}')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                                Eliminar
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lead-card-meta">
+                    <span class="badge {{ estado_badge_class(lead.estado) }}">{{ lead.estado }}</span>
+                    {% if lead.agente %}
+                    <span class="lead-card-meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <strong>{{ agent_map.get(lead.agente, lead.agente) }}</strong>
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="lead-card-tags">
+                    <span class="lead-tag">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.25rem;">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        {{ lead.interes }}
+                    </span>
+                    {% if lead.fecha_registro %}
+                    <span class="lead-tag">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.25rem;">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        {{ lead.fecha_registro }}
+                    </span>
+                    {% endif %}
+                    {% if lead.ultimo_contacto %}
+                    <span class="lead-tag">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.25rem;">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        {{ lead.ultimo_contacto }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {% if lead.observaciones %}
+                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ lead.observaciones }}">
+                    {{ lead.observaciones }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {# ===== DESKTOP: TABLE VIEW ===== #}
+        <div class="table-wrapper">
             <table class="leads-table">
                 <thead>
                     <tr>
-                        <th>Numero</th>
-                        <th>Fecha Reg.</th>
+                        <th>#</th>
+                        <th>Fecha</th>
                         <th>Celular</th>
                         <th>Nombre</th>
-                        <th>Interés</th>
+                        <th>Interes</th>
                         <th>Estado</th>
                         <th>Agente</th>
-                        <th>Último contacto</th>
-                        <th>Observaciones</th>
-                        <th class="col-actions">Acciones</th>
+                        <th>Ult. Contacto</th>
+                        <th>Obs.</th>
+                        <th style="width: 120px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for lead in leads %}
-                        <tr>
-                            <td style="white-space: nowrap; font-size: 0.85rem; color: var(--text-secondary);">
-                                {{ lead.numero }}
-                            </td>
-                            <td style="white-space: nowrap; font-size: 0.85rem; color: var(--text-secondary);">
-                                {{ lead.fecha_registro }}
-                            </td>
-                            <td style="font-weight: 600; color: #818cf8;">
-                                {{ lead.celular }}
-                            </td>
-                            <td>
-                                {{ lead.nombre if lead.nombre else '-' }}
-                            </td>
-                            <td>
-                                <span style="background: rgba(255,255,255,0.05); padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--panel-border);">
-                                    {{ lead.interes }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge {{ estado_badge_class(lead.estado) }}">
-                                    {{ lead.estado }}
-                                </span>
-                            </td>
-                            <td style="font-size: 0.9rem;" title="{{ lead.agente }}">
-                                {% if lead.agente %}
-                                    {{ agent_map.get(lead.agente, lead.agente) }}
-                                {% else %}
-                                    <span style="color: var(--text-secondary);">-</span>
+                    <tr>
+                        <td class="text-muted">{{ lead.numero }}</td>
+                        <td class="text-muted">{{ lead.fecha_registro }}</td>
+                        <td class="text-accent">{{ lead.celular }}</td>
+                        <td>{{ lead.nombre if lead.nombre else '-' }}</td>
+                        <td>
+                            <span style="background: rgba(255,255,255,0.04); padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.85rem; border: 1px solid var(--border-color);">
+                                {{ lead.interes }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {{ estado_badge_class(lead.estado) }}">{{ lead.estado }}</span>
+                        </td>
+                        <td title="{{ lead.agente }}">
+                            {% if lead.agente %}
+                                {{ agent_map.get(lead.agente, lead.agente) }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted">{{ lead.ultimo_contacto if lead.ultimo_contacto else '-' }}</td>
+                        <td class="text-muted" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ lead.observaciones }}">
+                            {{ lead.observaciones if lead.observaciones else '-' }}
+                        </td>
+                        <td>
+                            <div class="table-actions">
+                                {% if can_edit_lead(lead) %}
+                                <a href="{{ url_for('edit_lead', celular=lead.celular) }}" class="btn btn-secondary btn-sm btn-icon" title="Editar">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </a>
                                 {% endif %}
-                            </td>
-                            <td style="white-space: nowrap; font-size: 0.85rem; color: var(--text-secondary);">
-                                {{ lead.ultimo_contacto if lead.ultimo_contacto else '-' }}
-                            </td>
-                            <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85rem; color: var(--text-secondary);" title="{{ lead.observaciones }}">
-                                {{ lead.observaciones if lead.observaciones else '-' }}
-                            </td>
-                            <td class="col-actions">
-                                <div class="actions-cell">
-                                    {% if can_edit_lead(lead) %}
-                                    <a href="{{ url_for('edit_lead', celular=lead.celular) }}" class="btn btn-secondary btn-sm" title="Editar">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M12 20h9"></path>
-                                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                                        </svg>
-                                        Editar
-                                    </a>
-                                    {% endif %}
-                                    {% if current_user.is_supervisor %}
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('{{ lead.celular }}', '{{ lead.nombre }}')" title="Eliminar">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="3 6 5 6 21 6"></polyline>
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                        </svg>
-                                        Eliminar
-                                    </button>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
+                                {% if current_user.is_supervisor %}
+                                <button type="button" class="btn btn-secondary btn-sm btn-icon" onclick="confirmDelete('{{ lead.celular }}', '{{ lead.nombre }}')" title="Eliminar" style="color: var(--danger);">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
 
-            <!-- Paginación -->
-            {% if total_pages > 1 %}
-                <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem; border-top: 1px solid var(--panel-border); background: rgba(15, 23, 42, 0.4); flex-wrap: wrap; gap: 1rem; border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md);">
-                    <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                        Mostrando leads del <strong>{{ (page - 1) * per_page + 1 }}</strong> al <strong>{{ page * per_page if page * per_page < total_leads else total_leads }}</strong> de <strong>{{ total_leads }}</strong>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        {% if page > 1 %}
-                            <a href="{{ url_for('index', q=query, page=page-1) }}" class="btn btn-secondary btn-sm" style="padding: 0.5rem 1rem;">
-                                &larr; Anterior
-                            </a>
-                        {% else %}
-                            <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.4; cursor: not-allowed; padding: 0.5rem 1rem;">
-                                &larr; Anterior
-                            </button>
-                        {% endif %}
+        {# ===== PAGINATION ===== #}
+        {% if total_pages > 1 %}
+        <div class="pagination" style="margin-top: 1rem;">
+            <div class="pagination-info">
+                Mostrando <strong>{{ (page - 1) * per_page + 1 }}</strong> a <strong>{{ [page * per_page, total_leads] | min }}</strong> de <strong>{{ total_leads }}</strong>
+            </div>
+            <div class="pagination-controls">
+                {% if page > 1 %}
+                    <a href="{{ url_for('index', q=query, page=page-1) }}" class="btn btn-secondary btn-sm">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                        Anterior
+                    </a>
+                {% else %}
+                    <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.4; cursor: not-allowed;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                        Anterior
+                    </button>
+                {% endif %}
 
-                        <span style="font-size: 0.9rem; font-weight: 500; padding: 0 0.5rem; color: var(--text-primary);">
-                            Página {{ page }} de {{ total_pages }}
-                        </span>
+                <span class="pagination-current">{{ page }} / {{ total_pages }}</span>
 
-                        {% if page < total_pages %}
-                            <a href="{{ url_for('index', q=query, page=page+1) }}" class="btn btn-secondary btn-sm" style="padding: 0.5rem 1rem;">
-                                Siguiente &rarr;
-                            </a>
-                        {% else %}
-                            <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.4; cursor: not-allowed; padding: 0.5rem 1rem;">
-                                Siguiente &rarr;
-                            </button>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endif %}
-        {% else %}
-            <div class="no-leads">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                {% if page < total_pages %}
+                    <a href="{{ url_for('index', q=query, page=page+1) }}" class="btn btn-secondary btn-sm">
+                        Siguiente
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </a>
+                {% else %}
+                    <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.4; cursor: not-allowed;">
+                        Siguiente
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    {% else %}
+        {# ===== EMPTY STATE ===== #}
+        <div class="card">
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                     <circle cx="9" cy="7" r="4"></circle>
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -164,62 +271,97 @@
                 </svg>
                 <p>
                     {% if query %}No se encontraron leads para "{{ query }}"
-                    {% elif current_user.is_supervisor %}Aún no hay leads registrados.
-                    {% else %}No tienes leads asignados todavía.{% endif %}
+                    {% elif current_user.is_supervisor %}Aun no hay leads registrados.
+                    {% else %}No tienes leads asignados aun.{% endif %}
                 </p>
+                {% if not query %}
+                <a href="{{ url_for('add_lead') }}" class="btn btn-success">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Registrar primer lead
+                </a>
+                {% endif %}
             </div>
-        {% endif %}
-    </div>
-</div>
+        </div>
+    {% endif %}
 
-<!-- Modal de confirmación de eliminación -->
-{% if current_user.is_supervisor %}
-<div id="delete-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-title">Confirmar Eliminación</div>
-        <div class="modal-body">
-            ¿Estás seguro de que deseas eliminar este lead? Esta acción no se puede deshacer y el registro se borrará permanentemente de Google Sheets.
-            <br><br>
-            <strong>Lead:</strong> <span id="delete-lead-name"></span> (<span id="delete-lead-phone"></span>)
-        </div>
-        <div class="modal-footer">
-            <form id="delete-form" method="POST" action="">
+    {# ===== DELETE MODAL ===== #}
+    {% if current_user.is_supervisor %}
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Eliminar Lead</div>
+            <div class="modal-body">
+                <p>Se eliminara permanentemente este lead de Google Sheets. Esta accion no se puede deshacer.</p>
+                <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                    <strong style="color: var(--text-primary);"><span id="delete-lead-name"></span></strong>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+                        Celular: <span id="delete-lead-phone"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
-                <button type="submit" class="btn btn-danger">Eliminar Registro</button>
-            </form>
+                <form id="delete-form" method="POST" action="" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        Eliminar
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
+    {% endif %}
+
 </div>
-{% endif %}
 {% endblock %}
 
 {% block scripts %}
-{% if current_user.is_supervisor %}
 <script>
+    function toggleContextMenu(btn) {
+        const menu = btn.parentElement.querySelector('.context-menu');
+        const isActive = menu.classList.contains('active');
+        
+        // Close all other context menus first
+        document.querySelectorAll('.context-menu.active').forEach(function(m) {
+            m.classList.remove('active');
+        });
+        
+        if (!isActive) {
+            menu.classList.add('active');
+        }
+    }
+
+    {% if current_user.is_supervisor %}
     function confirmDelete(celular, nombre) {
         const modal = document.getElementById('delete-modal');
         const nameSpan = document.getElementById('delete-lead-name');
         const phoneSpan = document.getElementById('delete-lead-phone');
         const form = document.getElementById('delete-form');
 
-        nameSpan.textContent = nombre ? nombre : 'Sin Nombre';
+        nameSpan.textContent = nombre || 'Sin nombre';
         phoneSpan.textContent = celular;
-        form.action = `/delete/${encodeURIComponent(celular)}`;
+        form.action = '/delete/' + encodeURIComponent(celular);
 
         modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
     }
 
     function closeDeleteModal() {
         const modal = document.getElementById('delete-modal');
         modal.classList.remove('active');
+        document.body.style.overflow = '';
     }
 
-    window.onclick = function(event) {
-        const modal = document.getElementById('delete-modal');
-        if (event.target === modal) {
+    document.getElementById('delete-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
             closeDeleteModal();
         }
-    }
+    });
+    {% endif %}
 </script>
-{% endif %}
 {% endblock %}

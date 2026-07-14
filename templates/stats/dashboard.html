@@ -3,11 +3,28 @@
 {% block title %}Estadisticas - Mini CRM{% endblock %}
 
 {% block header_actions %}
-{{ super() }}
+<button class="btn btn-secondary" onclick="showPremiumAlert('Exportar a PDF')" style="opacity: 0.5; cursor: not-allowed; position: relative;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+    </svg>
+    PDF
+    <span style="position: absolute; top: -4px; right: -4px; font-size: 0.5rem; font-weight: 700; color: var(--premium-gold); background: var(--premium-bg); border: 1px solid var(--premium-border); padding: 0.1rem 0.3rem; border-radius: var(--radius-full);">PRO</span>
+</button>
+<button class="btn btn-secondary" onclick="showPremiumAlert('Exportar a Excel')" style="opacity: 0.5; cursor: not-allowed; position: relative;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+    </svg>
+    Excel
+    <span style="position: absolute; top: -4px; right: -4px; font-size: 0.5rem; font-weight: 700; color: var(--premium-gold); background: var(--premium-bg); border: 1px solid var(--premium-border); padding: 0.1rem 0.3rem; border-radius: var(--radius-full);">PRO</span>
+</button>
 <a href="{{ url_for('index') }}" class="btn btn-secondary">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
     </svg>
     Volver
 </a>
@@ -18,187 +35,189 @@
 {% endblock %}
 
 {% block content %}
-<style>
-    .kpi-card {
-        background: var(--panel-bg);
-        border: 1px solid var(--panel-border);
-        border-radius: var(--radius-md);
-        padding: 1.25rem;
-        text-align: center;
-    }
-    .kpi-value {
-        font-size: 2rem;
-        font-weight: 700;
-        line-height: 1.2;
-        margin-bottom: 0.25rem;
-    }
-    .kpi-label {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 600;
-    }
-    .kpi-sublabel {
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-        margin-top: 0.25rem;
-    }
-    .chart-container {
-        position: relative;
-        height: 320px;
-    }
-    .filter-bar {
-        display: flex;
-        gap: 0.75rem;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-    .filter-bar select {
-        padding: 0.5rem 0.75rem;
-        background: var(--panel-bg);
-        border: 1px solid var(--panel-border);
-        border-radius: var(--radius-md);
-        color: var(--text-primary);
-        font-size: 0.9rem;
-        font-family: inherit;
-        cursor: pointer;
-    }
-    .filter-bar select:focus {
-        outline: none;
-        border-color: var(--primary);
-    }
-</style>
+<div style="padding: 0 1rem;">
+    <h2 style="font-size: 1.35rem; margin-bottom: 1rem;">Estadisticas</h2>
 
-<!-- Filtros -->
-<div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
-    <form method="GET" class="filter-bar">
-        <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 600;">Periodo:</label>
-        <select name="range" onchange="this.form.submit()">
-            <option value="all" {% if range_param == 'all' %}selected{% endif %}>Todo el tiempo</option>
-            <option value="7d" {% if range_param == '7d' %}selected{% endif %}>Ultimos 7 dias</option>
-            <option value="30d" {% if range_param == '30d' %}selected{% endif %}>Ultimos 30 dias</option>
-            <option value="90d" {% if range_param == '90d' %}selected{% endif %}>Ultimos 90 dias</option>
-        </select>
-
-        <label style="font-size: 0.9rem; color: var(--text-secondary); font-weight: 600; margin-left: 1rem;">Agente:</label>
-        <select name="agent" onchange="this.form.submit()">
-            <option value="">Todos los agentes</option>
-            {% for a in all_agents %}
-                <option value="{{ a.email }}" {% if agent_filter == a.email %}selected{% endif %}>{{ a.nombre }}</option>
-            {% endfor %}
-        </select>
-
-        <div style="margin-left: auto; color: var(--text-secondary); font-size: 0.9rem;">
+    {# Filters #}
+    <div class="card" style="padding: 1rem;">
+        <form method="GET" class="filter-bar">
+            <div style="display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+                <label class="filter-bar-label" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Periodo</label>
+                <select name="range" onchange="this.form.submit()">
+                    <option value="all" {% if range_param == 'all' %}selected{% endif %}>Todo el tiempo</option>
+                    <option value="7d" {% if range_param == '7d' %}selected{% endif %}>Ultimos 7 dias</option>
+                    <option value="30d" {% if range_param == '30d' %}selected{% endif %}>Ultimos 30 dias</option>
+                    <option value="90d" {% if range_param == '90d' %}selected{% endif %}>Ultimos 90 dias</option>
+                </select>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.35rem; flex: 1;">
+                <label class="filter-bar-label" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Agente</label>
+                <select name="agent" onchange="this.form.submit()">
+                    <option value="">Todos los agentes</option>
+                    {% for a in all_agents %}
+                        <option value="{{ a.email }}" {% if agent_filter == a.email %}selected{% endif %}>{{ a.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+        <div style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">
             Mostrando: <strong style="color: var(--text-primary);">{{ range_label }}</strong>
             {% if agent_filter %} &middot; <strong style="color: var(--text-primary);">{{ agent_filter }}</strong>{% endif %}
         </div>
-    </form>
-</div>
+    </div>
 
-<!-- KPIs -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-    <div class="kpi-card">
-        <div class="kpi-value" style="color: #818cf8;">{{ stats.total_leads }}</div>
-        <div class="kpi-label">Total leads</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-value" style="color: #34d399;">{{ stats.inscritos }}</div>
-        <div class="kpi-label">Inscritos</div>
-        <div class="kpi-sublabel">Cerrados</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-value" style="color: #fbbf24;">{{ stats.en_seguimiento }}</div>
-        <div class="kpi-label">En seguimiento</div>
-        <div class="kpi-sublabel">Activos</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-value" style="color: #10b981;">{{ stats.conversion_rate }}%</div>
-        <div class="kpi-label">Conversion</div>
-        <div class="kpi-sublabel">Inscrito / Total</div>
-    </div>
-</div>
-
-<!-- Charts: Estado + Agentes -->
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;" class="charts-row">
-    <div class="card">
-        <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary); font-weight: 600;">Distribucion por estado</h3>
-        <div class="chart-container">
-            <canvas id="chart-estados"></canvas>
+    {# KPIs #}
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-value" style="color: #818cf8;">{{ stats.total_leads }}</div>
+            <div class="kpi-label">Total leads</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value" style="color: #34d399;">{{ stats.inscritos }}</div>
+            <div class="kpi-label">Inscritos</div>
+            <div class="kpi-sublabel">Cerrados</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value" style="color: #fbbf24;">{{ stats.en_seguimiento }}</div>
+            <div class="kpi-label">Seguimiento</div>
+            <div class="kpi-sublabel">Activos</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value" style="color: #10b981;">{{ stats.conversion_rate }}%</div>
+            <div class="kpi-label">Conversion</div>
+            <div class="kpi-sublabel">Inscrito / Total</div>
         </div>
     </div>
+
+    {# Charts #}
+    <div class="charts-grid">
+        <div class="card">
+            <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--text-muted); font-weight: 600;">Distribucion por estado</h3>
+            <div class="chart-container">
+                <canvas id="chart-estados"></canvas>
+            </div>
+        </div>
+        <div class="card">
+            <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--text-muted); font-weight: 600;">Leads por agente</h3>
+            {% if agents_data %}
+            <div class="chart-container">
+                <canvas id="chart-agents"></canvas>
+            </div>
+            {% else %}
+            <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                Sin datos para el filtro seleccionado.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Leads per day chart #}
     <div class="card">
-        <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary); font-weight: 600;">Leads por agente</h3>
-        {% if agents_data %}
+        <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--text-muted); font-weight: 600;">Leads por dia (ultimos 30 dias)</h3>
         <div class="chart-container">
-            <canvas id="chart-agents"></canvas>
+            <canvas id="chart-days"></canvas>
+        </div>
+    </div>
+
+    {# Top interests #}
+    <div class="card">
+        <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--text-muted); font-weight: 600;">Top intereses / carreras</h3>
+        {% if stats.top_intereses %}
+        <div style="overflow-x: auto;">
+            <table class="leads-table" style="margin: 0;">
+                <thead>
+                    <tr>
+                        <th>Interes</th>
+                        <th style="text-align: right;">Leads</th>
+                        <th style="min-width: 120px;">Distribucion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for interes, count in stats.top_intereses %}
+                    <tr>
+                        <td style="font-size: 0.85rem;">{{ interes }}</td>
+                        <td style="text-align: right; font-weight: 600;">{{ count }}</td>
+                        <td>
+                            <div style="background: rgba(255,255,255,0.05); border-radius: 9999px; height: 6px; overflow: hidden;">
+                                {% set pct = (count / stats.total_leads * 100) if stats.total_leads > 0 else 0 %}
+                                <div style="background: linear-gradient(90deg, #6366f1, #34d399); width: {{ pct }}%; height: 100%;"></div>
+                            </div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;">{{ '%.1f' | format(pct) }}%</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
         {% else %}
-        <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+        <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
             Sin datos para el filtro seleccionado.
         </div>
         {% endif %}
     </div>
-</div>
 
-<!-- Chart: Leads por dia -->
-<div class="card" style="margin-bottom: 1.5rem;">
-    <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary); font-weight: 600;">Leads por dia (ultimos 30 dias)</h3>
-    <div class="chart-container">
-        <canvas id="chart-days"></canvas>
+    {# ===== PREMIUM REPORT CARDS ===== #}
+    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--premium-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span style="font-size: 0.8rem; font-weight: 600; color: var(--premium-gold); text-transform: uppercase; letter-spacing: 0.5px;">Reportes Premium</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem;">
+            <button class="card" onclick="showPremiumAlert('Reporte de Conversion por Agente')" style="cursor: not-allowed; opacity: 0.5; text-align: left; border: 1px dashed var(--premium-border);">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--premium-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Conversion por Agente</span>
+                    <span style="margin-left: auto; font-size: 0.55rem; font-weight: 700; color: var(--premium-gold); background: var(--premium-bg); border: 1px solid var(--premium-border); padding: 0.1rem 0.35rem; border-radius: var(--radius-full);">PRO</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">Metricas individuales de conversion de cada agente del equipo.</p>
+            </button>
+
+            <button class="card" onclick="showPremiumAlert('Reporte de Tiempos de Respuesta')" style="cursor: not-allowed; opacity: 0.5; text-align: left; border: 1px dashed var(--premium-border);">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--premium-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Tiempos de Respuesta</span>
+                    <span style="margin-left: auto; font-size: 0.55rem; font-weight: 700; color: var(--premium-gold); background: var(--premium-bg); border: 1px solid var(--premium-border); padding: 0.1rem 0.35rem; border-radius: var(--radius-full);">PRO</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">Tiempo promedio entre registro y primer contacto con el lead.</p>
+            </button>
+
+            <button class="card" onclick="showPremiumAlert('Reporte de Funnel de Ventas')" style="cursor: not-allowed; opacity: 0.5; text-align: left; border: 1px dashed var(--premium-border);">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--premium-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">Funnel de Ventas</span>
+                    <span style="margin-left: auto; font-size: 0.55rem; font-weight: 700; color: var(--premium-gold); background: var(--premium-bg); border: 1px solid var(--premium-border); padding: 0.1rem 0.35rem; border-radius: var(--radius-full);">PRO</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">Visualizacion del embudo completo de conversión lead a inscrito.</p>
+            </button>
+        </div>
     </div>
 </div>
-
-<!-- Top intereses -->
-<div class="card">
-    <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary); font-weight: 600;">Top intereses / carreras</h3>
-    {% if stats.top_intereses %}
-    <table class="leads-table" style="margin: 0;">
-        <thead>
-            <tr>
-                <th>Interes</th>
-                <th style="text-align: right;">Leads</th>
-                <th style="width: 50%;">Distribucion</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for interes, count in stats.top_intereses %}
-            <tr>
-                <td>{{ interes }}</td>
-                <td style="text-align: right; font-weight: 600;">{{ count }}</td>
-                <td>
-                    <div style="background: rgba(255,255,255,0.05); border-radius: 9999px; height: 8px; overflow: hidden;">
-                        {% set pct = (count / stats.total_leads * 100) if stats.total_leads > 0 else 0 %}
-                        <div style="background: linear-gradient(90deg, #6366f1, #34d399); width: {{ pct }}%; height: 100%;"></div>
-                    </div>
-                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">{{ '%.1f' | format(pct) }}%</div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div style="padding: 2rem; text-align: center; color: var(--text-secondary);">
-        Sin datos para el filtro seleccionado.
-    </div>
-    {% endif %}
-</div>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Configuracion comun de Chart.js para que combine con el dark theme
     Chart.defaults.color = '#94a3b8';
     Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
-    Chart.defaults.font.family = "'Outfit', sans-serif";
+    Chart.defaults.font.family = "'Inter', sans-serif";
 
     const estadosData = {{ estados_data | tojson }};
     const estadosColors = {{ estados_colors | tojson }};
     const agentsData = {{ agents_data | tojson }};
     const dayData = {{ day_data | tojson }};
 
-    // Chart 1: Distribucion por estado (doughnut)
     if (estadosData.length > 0) {
         new Chart(document.getElementById('chart-estados'), {
             type: 'doughnut',
@@ -216,24 +235,17 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'right',
-                        labels: {
-                            padding: 12,
-                            font: { size: 11 },
-                            boxWidth: 14,
-                        }
+                        position: 'bottom',
+                        labels: { padding: 10, font: { size: 11 }, boxWidth: 12 }
                     },
                     tooltip: {
-                        callbacks: {
-                            label: (ctx) => `${ctx.label}: ${ctx.parsed} leads`
-                        }
+                        callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed} leads` }
                     }
                 }
             }
         });
     }
 
-    // Chart 2: Leads por agente (bar horizontal)
     if (agentsData.length > 0) {
         new Chart(document.getElementById('chart-agents'), {
             type: 'bar',
@@ -261,19 +273,13 @@
                     }
                 },
                 scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: { precision: 0 },
-                    },
-                    y: {
-                        ticks: { font: { size: 11 } },
-                    }
+                    x: { beginAtZero: true, ticks: { precision: 0 } },
+                    y: { ticks: { font: { size: 11 } } }
                 }
             }
         });
     }
 
-    // Chart 3: Leads por dia (line)
     new Chart(document.getElementById('chart-days'), {
         type: 'line',
         data: {
@@ -288,8 +294,8 @@
                 pointBackgroundColor: '#6366f1',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 1,
-                pointRadius: 3,
-                pointHoverRadius: 6,
+                pointRadius: 2,
+                pointHoverRadius: 5,
             }]
         },
         options: {
@@ -308,17 +314,8 @@
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { precision: 0 },
-                },
-                x: {
-                    ticks: {
-                        maxRotation: 0,
-                        autoSkip: true,
-                        maxTicksLimit: 10,
-                    }
-                }
+                y: { beginAtZero: true, ticks: { precision: 0 } },
+                x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8, font: { size: 10 } } }
             }
         }
     });

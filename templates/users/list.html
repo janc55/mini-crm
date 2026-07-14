@@ -3,9 +3,8 @@
 {% block title %}Gestion de Usuarios - Mini CRM{% endblock %}
 
 {% block header_actions %}
-{{ super() }}
-<a href="{{ url_for('users.new_user') }}" class="btn btn-accent">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<a href="{{ url_for('users.new_user') }}" class="btn btn-success">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
@@ -14,27 +13,18 @@
 {% endblock %}
 
 {% block content %}
-<div class="card" style="padding: 0;">
-    <div class="table-responsive">
+<div style="padding: 0 1rem;">
+    <div class="card" style="padding: 0; overflow: hidden;">
         {% if users %}
-            <table class="leads-table">
-                <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Rol</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in users %}
-                    <tr>
-                        <td style="font-weight: 600; color: #818cf8;">{{ u.username }}</td>
-                        <td>{{ u.nombre }}</td>
-                        <td style="font-size: 0.9rem; color: var(--text-secondary);">{{ u.email }}</td>
-                        <td>
+
+            {# Mobile: user cards #}
+            <div class="user-card-list" style="padding: 0.75rem;">
+                {% for u in users %}
+                <div class="user-card">
+                    <div class="user-card-info">
+                        <div class="user-card-name">{{ u.nombre }}</div>
+                        <div class="user-card-email">{{ u.email }}</div>
+                        <div class="user-card-badges">
                             {% if u.rol == 'admin' %}
                                 <span class="badge estado-inscrito">Admin</span>
                             {% elif u.rol == 'marketing' %}
@@ -42,60 +32,123 @@
                             {% else %}
                                 <span class="badge estado-nuevo">Agente</span>
                             {% endif %}
-                        </td>
-                        <td>
                             {% if u.activo %}
                                 <span class="badge estado-interesado">Activo</span>
                             {% else %}
                                 <span class="badge estado-no-interesado">Inactivo</span>
                             {% endif %}
-                        </td>
-                        <td>
-                            <div class="actions-cell">
-                                <a href="{{ url_for('users.edit_user', user_id=u.id) }}" class="btn btn-secondary btn-sm" title="Editar">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M12 20h9"></path>
-                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                                    </svg>
-                                    Editar
-                                </a>
-                                {% if u.id != current_user.id %}
-                                <form method="POST" action="{{ url_for('users.toggle_user', user_id=u.id) }}" style="display: inline;">
-                                    <button type="submit" class="btn btn-sm {{ 'btn-danger' if u.activo else 'btn-accent' }}" title="{{ 'Desactivar' if u.activo else 'Activar' }}" onclick="return confirm('{{ 'Desactivar' if u.activo else 'Activar' }} al usuario {{ u.username }}?')">
-                                        {% if u.activo %}
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                        </svg>
-                                        Desactivar
-                                        {% else %}
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
-                                        </svg>
-                                        Activar
-                                        {% endif %}
-                                    </button>
-                                </form>
+                        </div>
+                    </div>
+                    <div class="user-card-actions">
+                        <a href="{{ url_for('users.edit_user', user_id=u.id) }}" class="btn btn-secondary btn-sm" style="flex: 1;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            Editar
+                        </a>
+                        {% if u.id != current_user.id %}
+                        <form method="POST" action="{{ url_for('users.toggle_user', user_id=u.id) }}" style="display: contents;">
+                            <button type="submit" class="btn btn-sm {{ 'btn-danger' if u.activo else 'btn-success' }}" style="flex: 1;"
+                                    onclick="return confirm('{{ 'Desactivar' if u.activo else 'Activar' }} al usuario {{ u.username }}?')">
+                                {% if u.activo %}
+                                Desactivar
+                                {% else %}
+                                Activar
                                 {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {# Desktop: table view #}
+            <div class="table-wrapper" style="border: none; border-radius: 0;">
+                <table class="leads-table" style="margin: 0;">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th style="width: 180px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td style="font-weight: 600; color: #818cf8;">{{ u.username }}</td>
+                            <td>{{ u.nombre }}</td>
+                            <td style="font-size: 0.85rem; color: var(--text-muted);">{{ u.email }}</td>
+                            <td>
+                                {% if u.rol == 'admin' %}
+                                    <span class="badge estado-inscrito">Admin</span>
+                                {% elif u.rol == 'marketing' %}
+                                    <span class="badge estado-info-enviada">Marketing</span>
+                                {% else %}
+                                    <span class="badge estado-nuevo">Agente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if u.activo %}
+                                    <span class="badge estado-interesado">Activo</span>
+                                {% else %}
+                                    <span class="badge estado-no-interesado">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <a href="{{ url_for('users.edit_user', user_id=u.id) }}" class="btn btn-secondary btn-sm btn-icon" title="Editar">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                    </a>
+                                    {% if u.id != current_user.id %}
+                                    <form method="POST" action="{{ url_for('users.toggle_user', user_id=u.id) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm {{ 'btn-danger' if u.activo else 'btn-success' }} btn-icon"
+                                                title="{{ 'Desactivar' if u.activo else 'Activar' }}"
+                                                onclick="return confirm('{{ 'Desactivar' if u.activo else 'Activar' }} al usuario {{ u.username }}?')">
+                                            {% if u.activo %}
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                            </svg>
+                                            {% else %}
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+                                            </svg>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
         {% else %}
-            <div class="no-leads">
+            <div class="empty-state">
                 <p>No hay usuarios registrados. Crea el primero.</p>
+                <a href="{{ url_for('users.new_user') }}" class="btn btn-success">Crear usuario</a>
             </div>
         {% endif %}
     </div>
-</div>
 
-<div style="margin-top: 1.5rem; padding: 1rem 1.25rem; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: var(--radius-md); font-size: 0.85rem; color: var(--text-secondary);">
-    <strong style="color: var(--text-primary);">Roles:</strong>
-    <span style="margin-left: 0.5rem;"><span class="badge estado-nuevo">Agente</span> ve y edita solo sus leads. Auto-asignado al crear.</span><br>
-    <span style="margin-left: 4.2rem;"><span class="badge estado-info-enviada">Marketing</span> ve todos los leads, reasigna, gestiona agentes.</span><br>
-    <span style="margin-left: 4.2rem;"><span class="badge estado-inscrito">Admin</span> todo de marketing + gestion de usuarios.</span>
+    <div class="info-box">
+        <strong>Roles:</strong>
+        <ul>
+            <li><span class="badge estado-nuevo" style="font-size: 0.7rem;">Agente</span> ve y edita solo sus leads.</li>
+            <li><span class="badge estado-info-enviada" style="font-size: 0.7rem;">Marketing</span> ve todos los leads, reasigna, gestiona agentes.</li>
+            <li><span class="badge estado-inscrito" style="font-size: 0.7rem;">Admin</span> todo de marketing + gestion de usuarios.</li>
+        </ul>
+    </div>
 </div>
 {% endblock %}

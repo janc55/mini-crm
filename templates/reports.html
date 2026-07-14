@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Reportes - Mini CRM{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('index') }}" class="btn btn-secondary">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+    Volver
+</a>
+{% endblock %}
+
+{% block content %}
+<div style="padding: 0 1rem;">
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+        <h2 style="font-size: 1.35rem;">Reportes</h2>
+        <span class="demo-badge">PRO</span>
+    </div>
+
+    {# Premium lock banner #}
+    <div class="card" style="border: 1px dashed var(--premium-border); background: var(--premium-bg); text-align: center; padding: 2.5rem 1.5rem; margin-bottom: 1.5rem;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--premium-gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem; opacity: 0.8;">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <h3 style="font-size: 1.15rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">Funcion Premium</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 480px; margin: 0 auto 1.25rem;">
+            Los reportes avanzados estan disponibles en la version completa del CRM. Desbloquea analisis detallados para optimizar tu estrategia de ventas.
+        </p>
+        <a href="#" class="btn" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1a1b3a; font-weight: 700; border: none; padding: 0.75rem 1.5rem;" onclick="showPremiumAlert('Actualizacion de plan'); return false;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            Actualizar a Premium
+        </a>
+    </div>
+
+    {# Report mockup cards #}
+    <div style="display: grid; grid-template-columns: 1fr; gap: 0.75rem;">
+
+        {# Report 1: Conversion por Agente #}
+        <div class="card" style="opacity: 0.55; border: 1px dashed var(--border-color-light); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: var(--premium-bg); border-left: 1px solid var(--premium-border); border-bottom: 1px solid var(--premium-border); border-bottom-left-radius: var(--radius-sm); padding: 0.3rem 0.75rem; font-size: 0.6rem; font-weight: 700; color: var(--premium-gold); letter-spacing: 0.5px;">PRO</div>
+            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: rgba(99, 102, 241, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">Conversion por Agente</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem;">Tasa de conversion individual de cada agente: leads asignados vs inscritos. Identifica a los mejores performers y areas de mejora.</p>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <span class="badge" style="background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.2);">Ranking</span>
+                        <span class="badge" style="background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.2);">Grafico barras</span>
+                        <span class="badge" style="background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.2);">Export PDF</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Report 2: Funnel de Ventas #}
+        <div class="card" style="opacity: 0.55; border: 1px dashed var(--border-color-light); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: var(--premium-bg); border-left: 1px solid var(--premium-border); border-bottom: 1px solid var(--premium-border); border-bottom-left-radius: var(--radius-sm); padding: 0.3rem 0.75rem; font-size: 0.6rem; font-weight: 700; color: var(--premium-gold); letter-spacing: 0.5px;">PRO</div>
+            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: rgba(16, 185, 129, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                    </svg>
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">Funnel de Ventas</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem;">Visualizacion del embudo completo: Nuevo &rarr; Interesado &rarr; Visita &rarr; Inscrito. Muestra donde se pierden los leads en cada etapa.</p>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <span class="badge" style="background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2);">Embudo visual</span>
+                        <span class="badge" style="background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2);">Tasa por etapa</span>
+                        <span class="badge" style="background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2);">Export Excel</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Report 3: Tiempos de Respuesta #}
+        <div class="card" style="opacity: 0.55; border: 1px dashed var(--border-color-light); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: var(--premium-bg); border-left: 1px solid var(--premium-border); border-bottom: 1px solid var(--premium-border); border-bottom-left-radius: var(--radius-sm); padding: 0.3rem 0.75rem; font-size: 0.6rem; font-weight: 700; color: var(--premium-gold); letter-spacing: 0.5px;">PRO</div>
+            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: rgba(245, 158, 11, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">Tiempos de Respuesta</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem;">Tiempo promedio entre el registro de un lead y su primer contacto. Mide la rapidez del equipo y su impacto en la conversion.</p>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <span class="badge" style="background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2);">Promedio</span>
+                        <span class="badge" style="background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2);">Por agente</span>
+                        <span class="badge" style="background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2);">Tendencia</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Report 4: Evolución Mensual #}
+        <div class="card" style="opacity: 0.55; border: 1px dashed var(--border-color-light); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: var(--premium-bg); border-left: 1px solid var(--premium-border); border-bottom: 1px solid var(--premium-border); border-bottom-left-radius: var(--radius-sm); padding: 0.3rem 0.75rem; font-size: 0.6rem; font-weight: 700; color: var(--premium-gold); letter-spacing: 0.5px;">PRO</div>
+            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: rgba(244, 63, 94, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                        <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">Evolucion Mensual</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem;">Comparativa mes a mes: leads recibidos, tasa de conversion, y crecimiento del equipo. Ideal para presentar resultados a direccion.</p>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <span class="badge" style="background: rgba(244,63,94,0.1); color: #f87171; border: 1px solid rgba(244,63,94,0.2);">Mensual</span>
+                        <span class="badge" style="background: rgba(244,63,94,0.1); color: #f87171; border: 1px solid rgba(244,63,94,0.2);">Comparativo</span>
+                        <span class="badge" style="background: rgba(244,63,94,0.1); color: #f87171; border: 1px solid rgba(244,63,94,0.2);">Export PDF</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Report 5: Rendimiento por Interes #}
+        <div class="card" style="opacity: 0.55; border: 1px dashed var(--border-color-light); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; right: 0; background: var(--premium-bg); border-left: 1px solid var(--premium-border); border-bottom: 1px solid var(--premium-border); border-bottom-left-radius: var(--radius-sm); padding: 0.3rem 0.75rem; font-size: 0.6rem; font-weight: 700; color: var(--premium-gold); letter-spacing: 0.5px;">PRO</div>
+            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: rgba(14, 165, 233, 0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <div style="flex: 1;">
+                    <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.25rem;">Rendimiento por Interes</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.75rem;">Analisis de conversion por tipo de interes o carrera. Descubre cuales programas generan mas inscritos y cuales necesitan mas seguimiento.</p>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <span class="badge" style="background: rgba(14,165,233,0.1); color: #38bdf8; border: 1px solid rgba(14,165,233,0.2);">Por carrera</span>
+                        <span class="badge" style="background: rgba(14,165,233,0.1); color: #38bdf8; border: 1px solid rgba(14,165,233,0.2);">Heatmap</span>
+                        <span class="badge" style="background: rgba(14,165,233,0.1); color: #38bdf8; border: 1px solid rgba(14,165,233,0.2);">Export Excel</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {# Bottom CTA #}
+    <div class="card" style="text-align: center; margin-top: 1.5rem; border: 1px solid var(--premium-border); background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);">
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            Desbloquea <strong style="color: var(--premium-gold);">todos los reportes</strong> y lleva tu equipo de ventas al siguiente nivel.
+        </p>
+        <a href="#" class="btn" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1a1b3a; font-weight: 700; border: none;" onclick="showPremiumAlert('Actualizacion de plan'); return false;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            Conocer planes y precios
+        </a>
+    </div>
+</div>
+{% endblock %}
